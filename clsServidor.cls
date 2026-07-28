@@ -32,6 +32,9 @@ Private mDiscoGB As Double
 Private mDataCadastro As Date
 Private mDataAtualizacao As Date
 Private mObservacoes As String
+Private mIsNew As Boolean
+Private mIsLoaded As Boolean
+Private mIsDirty As Boolean
 
 Private Sub Class_Initialize()
     Clear
@@ -39,6 +42,7 @@ End Sub
 
 Public Sub Clear()
  mID = "": mHostname = "": mFQDN = "": mDescricao = "": mAmbiente = "": mSistemaOperacional = "": mVersaoSO = "": mArquitetura = "": mFabricante = "": mModelo = "": mSerial = "": mPatrimonio = "": mVirtual = False: mHypervisor = "": mHostFisico = "": mCluster = "": mDatastore = "": mCPU = "": mMemoriaGB = 0: mDiscoGB = 0: mDataCadastro = 0: mDataAtualizacao = 0: mObservacoes = ""
+ mIsNew = True: mIsLoaded = False: mIsDirty = False
 End Sub
 
 Public Property Get ID() As String: ID = mID: End Property
@@ -87,6 +91,9 @@ Public Property Get DataAtualizacao() As Date: DataAtualizacao = mDataAtualizaca
 Public Property Let DataAtualizacao(ByVal Value As Date): mDataAtualizacao = Value: End Property
 Public Property Get Observacoes() As String: Observacoes = mObservacoes: End Property
 Public Property Let Observacoes(ByVal Value As String): mObservacoes = Trim$(Value): End Property
+Public Property Get IsNew() As Boolean: IsNew = mIsNew: End Property
+Public Property Get IsLoaded() As Boolean: IsLoaded = mIsLoaded: End Property
+Public Property Get IsDirty() As Boolean: IsDirty = mIsDirty: End Property
 
 Public Function Validate() As Boolean
  Validate = (Len(mHostname) > 0 And Len(mSistemaOperacional) > 0)
@@ -96,3 +103,18 @@ Public Function IsVirtual() As Boolean
  IsVirtual = mVirtual
 End Function
 
+Public Sub Touch()
+ If mDataCadastro = 0 Then mDataCadastro = Now
+ mDataAtualizacao = Now
+ MarkDirty
+End Sub
+
+Public Sub MarkDirty()
+ mIsDirty = True
+End Sub
+
+Public Sub AcceptChanges()
+ mIsNew = False
+ mIsLoaded = True
+ mIsDirty = False
+End Sub

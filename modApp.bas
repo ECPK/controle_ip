@@ -34,6 +34,7 @@ Public Function ValidateSheets() As Boolean
         WorksheetExists(WS_INICIO) And _
         WorksheetExists(WS_BASE_IPS) And _
         WorksheetExists(WS_DASHBOARD) And _
+        WorksheetExists(WS_INVENTARIO) And _
         WorksheetExists(WS_CONFIG) And _
         WorksheetExists(WS_LOG)
 
@@ -41,9 +42,7 @@ End Function
 
 Public Function ValidateTables() As Boolean
 
-    ValidateTables = _
-        TableExists(TB_IPS) And _
-        TableExists(TB_CONFIG)
+    ValidateTables = TableExists(TB_IPS)
 
 End Function
 

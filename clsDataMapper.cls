@@ -34,21 +34,23 @@ End Property
 '------------------------------------------------------------------------------
 Public Function SaveServidor(ByVal Servidor As clsServidor) As Boolean
 
-    On Error GoTo TratarErro:
+    On Error GoTo TratarErro
 
     If Servidor Is Nothing Then Exit Function
     If Not Servidor.Validate Then Exit Function
 
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_HOSTNAME, Servidor.Hostname
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_FQDN, Servidor.FQDN
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_DESCRICAO, Servidor.Descricao
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_AMBIENTE, Servidor.Ambiente
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_SO, Servidor.SistemaOperacional
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_VERSAO_SO, Servidor.VersaoSO
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_ARQUITETURA, Servidor.Arquitetura
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_CPU, Servidor.CPU
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_MEMORIA, Servidor.MemoriaGB
-    WriteField TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_DISCO, Servidor.DiscoGB
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_HOSTNAME, Servidor.Hostname
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_FQDN, Servidor.FQDN
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_DESCRICAO, Servidor.Descricao
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_AMBIENTE, Servidor.Ambiente
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_SO, Servidor.SistemaOperacional
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_VERSAO_SO, Servidor.VersaoSO
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_ARQUITETURA, Servidor.Arquitetura
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_CPU, Servidor.CPU
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_MEMORIA, Servidor.MemoriaGB
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_OBSERVACOES, Servidor.Observacoes
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_DATA_CADASTRO, Servidor.DataCadastro
+    WriteFieldByKey TB_SERVIDORES, COL_SERV_ID, Servidor.ID, COL_SERV_DATA_ATUALIZACAO, Servidor.DataAtualizacao
 
     SaveServidor = True
     Exit Function
@@ -63,19 +65,23 @@ End Function
 '------------------------------------------------------------------------------
 Public Function LoadServidor(ByVal ID As String) As clsServidor
 
-    On Error GoTo TratarErro:
+    On Error GoTo TratarErro
 
     Dim S As New clsServidor
 
     S.ID = ID
-    S.Hostname = CStr(ReadField(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_HOSTNAME))
-    S.FQDN = CStr(ReadField(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_FQDN))
-    S.Descricao = CStr(ReadField(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_DESCRICAO))
-    S.Ambiente = CStr(ReadField(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_AMBIENTE))
-    S.SistemaOperacional = CStr(ReadField(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_SO))
-    S.VersaoSO = CStr(ReadField(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_VERSAO_SO))
-    S.Arquitetura = CStr(ReadField(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_ARQUITETURA))
-    S.CPU = CStr(ReadField(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_CPU))
+    S.Hostname = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_HOSTNAME))
+    S.FQDN = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_FQDN))
+    S.Descricao = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_DESCRICAO))
+    S.Ambiente = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_AMBIENTE))
+    S.SistemaOperacional = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_SO))
+    S.VersaoSO = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_VERSAO_SO))
+    S.Arquitetura = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_ARQUITETURA))
+    S.CPU = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_CPU))
+    S.MemoriaGB = Val(CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_MEMORIA)))
+    S.Observacoes = CStr(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_OBSERVACOES))
+    If IsDate(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_DATA_CADASTRO)) Then S.DataCadastro = CDate(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_DATA_CADASTRO))
+    If IsDate(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_DATA_ATUALIZACAO)) Then S.DataAtualizacao = CDate(ReadFieldByKey(TB_SERVIDORES, COL_SERV_ID, ID, COL_SERV_DATA_ATUALIZACAO))
 
     S.AcceptChanges
 

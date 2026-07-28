@@ -37,15 +37,16 @@ Public Function Save(ByVal Servidor As clsServidor) As Boolean
 
     On Error GoTo TratarErro
 
-    If Servidor Is Nothing Then Exit Function
+    Dim Mapper As New clsDataMapper
 
+    If Servidor Is Nothing Then Exit Function
+    If Len(Servidor.ID) = 0 Then Servidor.ID = Servidor.Hostname
     If Not Servidor.Validate Then Exit Function
 
-    ' Nesta primeira versão a persistência ainda será integrada
-    ' ao modRepository nas próximas entregas.
+    Servidor.Touch
+    If Not Mapper.SaveServidor(Servidor) Then Exit Function
 
     Servidor.AcceptChanges
-
     Save = True
 
     Exit Function
@@ -62,7 +63,7 @@ Public Function Delete(ByVal ID As String) As Boolean
 
     On Error GoTo TratarErro
 
-    Delete = DeleteRecord(TB_SERVIDORES, COL_SERV_ID, ID)
+    Delete = DeleteRecordByKey(TB_SERVIDORES, COL_SERV_ID, ID)
 
     Exit Function
 
@@ -78,14 +79,11 @@ Public Function Load(ByVal ID As String) As clsServidor
 
     On Error GoTo TratarErro
 
-    Dim Servidor As New clsServidor
+    Dim Mapper As New clsDataMapper
 
-    ' Próxima etapa:
-    ' Ler os campos utilizando ReadField()
-    ' Popular o objeto
-    ' Chamar AcceptChanges()
+    If Not Exists(ID) Then Exit Function
 
-    Set Load = Servidor
+    Set Load = Mapper.LoadServidor(ID)
 
     Exit Function
 
