@@ -1,4 +1,4 @@
-﻿Attribute VB_Name = "modImportacao"
+Attribute VB_Name = "modImportacao"
 Option Explicit
 
 '==============================================================================
@@ -12,7 +12,15 @@ Private Const IMPORT_HEADER_ROW As Long = 1
 
 Public Sub ExecutarImportacaoLevantamento()
 
-    ImportarLevantamento
+    Dim FilePath As String
+
+    FilePath = ThisWorkbook.Path & Application.PathSeparator & "LEVANTAMENTO.xlsx"
+
+    If Len(Dir$(FilePath)) > 0 Then
+        ImportarLevantamento FilePath
+    Else
+        ImportarLevantamento
+    End If
 
 End Sub
 Public Function ImportarLevantamento(Optional ByVal FilePath As String = "") As Boolean
@@ -53,6 +61,7 @@ Public Function ImportarLevantamento(Optional ByVal FilePath As String = "") As 
 
     RowsProcessed = ProcessarInventarioParaBase()
     LimparInventario
+    AtualizarPaineis
 
     RegistrarImportacao LOG_SUCCESS, MSG_IMPORTACAO_SUCESSO & _
         " Linhas importadas: " & RowsImported & _
@@ -215,6 +224,14 @@ Private Function GetDefaultBaseValue(ByVal BaseHeaderName As String, _
     Select Case BaseHeaderName
         Case COL_SERV_ID
             GetDefaultBaseValue = BuildImportedID(SourceRange, SourceRowIndex)
+        Case COL_SERV_REDE
+            GetDefaultBaseValue = ExtrairRedeImportada(SourceRange, SourceRowIndex)
+        Case COL_SERV_OCTETO
+            GetDefaultBaseValue = ExtrairOctetoImportado(SourceRange, SourceRowIndex)
+        Case COL_SERV_STATUS_IP
+            GetDefaultBaseValue = "Utilizado"
+        Case COL_SERV_OBSERVACOES
+            GetDefaultBaseValue = BuildDescricaoImportada(SourceRange, SourceRowIndex)
         Case COL_SERV_DATA_CADASTRO, COL_SERV_DATA_ATUALIZACAO
             GetDefaultBaseValue = Now
     End Select
@@ -235,6 +252,61 @@ Private Function BuildImportedID(ByVal SourceRange As Range, ByVal SourceRowInde
     End If
 
     BuildImportedID = Value
+
+End Function
+Private Function ExtrairRedeImportada(ByVal SourceRange As Range, ByVal SourceRowIndex As Long) As String
+
+    Dim partes() As String
+
+    partes = Split(GetSourceValue(SourceRange, SourceRowIndex, COL_SERV_IP), ".")
+    If UBound(partes) >= 3 Then ExtrairRedeImportada = partes(0) & "." & partes(1) & "." & partes(2)
+
+End Function
+
+Private Function ExtrairOctetoImportado(ByVal SourceRange As Range, ByVal SourceRowIndex As Long) As Variant
+
+    Dim partes() As String
+
+    partes = Split(GetSourceValue(SourceRange, SourceRowIndex, COL_SERV_IP), ".")
+    If UBound(partes) >= 3 Then ExtrairOctetoImportado = CLng(Val(partes(3)))
+
+End Function
+
+Private Function BuildDescricaoImportada(ByVal SourceRange As Range, ByVal SourceRowIndex As Long) As String
+
+    Dim texto As String
+
+    texto = AddDescricaoLinha(texto, "Hostname", GetSourceValue(SourceRange, SourceRowIndex, COL_SERV_HOSTNAME))
+    texto = AddDescricaoLinha(texto, "Interface", GetSourceValue(SourceRange, SourceRowIndex, COL_SERV_INTERFACE))
+    texto = AddDescricaoLinha(texto, "Gerencia", GetSourceValue(SourceRange, SourceRowIndex, COL_SERV_GERENCIA))
+    texto = AddDescricaoLinha(texto, "Sistema", GetSourceValue(SourceRange, SourceRowIndex, COL_SERV_SO))
+    texto = AddDescricaoLinha(texto, "Projeto", GetSourceValue(SourceRange, SourceRowIndex, COL_SERV_PROJETO))
+
+    BuildDescricaoImportada = texto
+
+End Function
+
+Private Function AddDescricaoLinha(ByVal texto As String, ByVal rotulo As String, ByVal valor As String) As String
+
+    valor = Trim$(valor)
+    If Len(valor) = 0 Then
+        AddDescricaoLinha = texto
+        Exit Function
+    End If
+
+    If Len(texto) > 0 Then texto = texto & vbCrLf
+    AddDescricaoLinha = texto & rotulo & ": " & valor
+
+End Function
+
+Private Function GetSourceValue(ByVal SourceRange As Range, _
+                                ByVal SourceRowIndex As Long, _
+                                ByVal BaseHeaderName As String) As String
+
+    Dim SourceColumnIndex As Long
+
+    SourceColumnIndex = FindSourceColumnIndex(SourceRange, BaseHeaderName)
+    If SourceColumnIndex > 0 Then GetSourceValue = CStr(SourceRange.Cells(SourceRowIndex, SourceColumnIndex).Value)
 
 End Function
 
