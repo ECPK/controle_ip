@@ -12,38 +12,43 @@ Private Const IMPORT_HEADER_ROW As Long = 1
 
 Public Sub ExecutarImportacaoLevantamento()
 
+    PreencherAutomaticoLevantamento
+
+End Sub
+
+Public Sub PreencherAutomaticoLevantamento()
+
     Dim FilePath As String
 
-    FilePath = ThisWorkbook.Path & Application.PathSeparator & "LEVANTAMENTO.xlsx"
+    FilePath = ResolveLevantamentoPath(False)
 
-    If Len(Dir$(FilePath)) > 0 Then
-        ImportarLevantamento FilePath
-    Else
-        ImportarLevantamento
+    If Len(FilePath) = 0 Then
+        ShowError "Coloque o arquivo LEVANTAMENTO.xlsx na mesma pasta desta planilha e execute novamente."
+        RegistrarImportacao LOG_WARNING, "Arquivo LEVANTAMENTO.xlsx nao encontrado para preenchimento automatico."
+        Exit Sub
+    End If
+
+    If ImportarLevantamento(FilePath) And Application.Visible Then
+        MsgBox MSG_IMPORTACAO_SUCESSO, vbInformation + vbOKOnly, APP_NOME
     End If
 
 End Sub
+
 Public Function ImportarLevantamento(Optional ByVal FilePath As String = "") As Boolean
 
     On Error GoTo TrataErro
 
-    Dim SelectedFile As Variant
     Dim SourceWorkbook As Workbook
     Dim SourceWorksheet As Worksheet
     Dim RowsImported As Long
     Dim RowsProcessed As Long
 
     If Len(FilePath) = 0 Then
-        SelectedFile = Application.GetOpenFilename( _
-            FileFilter:="Arquivos Excel (*.xlsx;*.xlsm),*.xlsx;*.xlsm", _
-            Title:="Selecionar LEVANTAMENTO.xlsx")
-
-        If VarType(SelectedFile) = vbBoolean Then
+        FilePath = ResolveLevantamentoPath(True)
+        If Len(FilePath) = 0 Then
             RegistrarImportacao LOG_WARNING, MSG_IMPORTACAO_CANCELADA
             Exit Function
         End If
-
-        FilePath = CStr(SelectedFile)
     End If
 
     DebugInfo "Importando levantamento: " & FilePath
@@ -79,6 +84,51 @@ TrataErro:
     DebugError "modImportacao.ImportarLevantamento: " & Err.Description
     UpdateStatusBar APP_STATUS_ERRO
     ImportarLevantamento = False
+
+End Function
+
+Private Function ResolveLevantamentoPath(Optional ByVal AllowPicker As Boolean = True) As String
+
+    Dim FolderPath As String
+    Dim Candidate As String
+    Dim FileName As String
+    Dim LatestFile As String
+    Dim LatestDate As Date
+    Dim SelectedFile As Variant
+
+    FolderPath = ThisWorkbook.Path
+    If Len(FolderPath) > 0 Then
+        Candidate = FolderPath & Application.PathSeparator & "LEVANTAMENTO.xlsx"
+        If Len(Dir$(Candidate)) > 0 Then
+            ResolveLevantamentoPath = Candidate
+            Exit Function
+        End If
+
+        FileName = Dir$(FolderPath & Application.PathSeparator & "LEVANTAMENTO*.xlsx")
+        Do While Len(FileName) > 0
+            If Left$(FileName, 2) <> "~$" Then
+                Candidate = FolderPath & Application.PathSeparator & FileName
+                If FileDateTime(Candidate) > LatestDate Then
+                    LatestDate = FileDateTime(Candidate)
+                    LatestFile = Candidate
+                End If
+            End If
+            FileName = Dir$
+        Loop
+
+        If Len(LatestFile) > 0 Then
+            ResolveLevantamentoPath = LatestFile
+            Exit Function
+        End If
+    End If
+
+    If AllowPicker Then
+        SelectedFile = Application.GetOpenFilename( _
+            FileFilter:="Arquivos Excel (*.xlsx;*.xlsm),*.xlsx;*.xlsm", _
+            Title:="Selecionar LEVANTAMENTO.xlsx")
+
+        If VarType(SelectedFile) <> vbBoolean Then ResolveLevantamentoPath = CStr(SelectedFile)
+    End If
 
 End Function
 
